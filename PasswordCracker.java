@@ -5,82 +5,80 @@
 
 import java.util.Scanner;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.security.MessageDigest;
+
+
 public class PasswordCracker{
 		static File outputFile = new File("./output.txt");
 
         public static void main(String[] args) throws FileNotFoundException, IOException {
-        //Clear output file from any previous run
-        Writer writer = new FileWriter(outputFile);
-        writer.close();
-        String inputFilePath="";
-        //Grab the filepath needed to iterate rules over
-        if(args.length == 0){
-            System.out.println("error no filepath specified as argument");
-            System.exit(0);
-        }
-        else {
-        	inputFilePath = args[0];
-        }
-        
-        File inputFile = new File(inputFilePath);
-        if(!inputFile.exists()){
-        	System.out.println("error no file exist at provided filepath: " + inputFilePath);
-        	System.exit(0);
-        }
-        if(inputFile.isDirectory()) {
-        	System.out.println("error filepath points to a directory");
-        	System.exit(0);
-        }
-        //Here the input file is guaranteed to exist and be a non-directory
-        inputFile = new File(inputFilePath);
-        String userResponse="";
-        Scanner scan = new Scanner(System.in);
-        while(userResponse.compareToIgnoreCase("q")!=0){
-            //User needs to choose a rule to test
-            System.out.println("Please select a rule to test:   Or 'q' to quit" +
-            "\n" + "1.) All numbers (4 digits to 6 digits in length)" +
-            "\n" + "2.) A four char word which gets the first letter capitalized and a 1-digit number appended." +
-            "\n" + "3.) A five char word with the letter 'e' in it which gets replaced with a 3" +
-            "\n" + "4.) Any single word from /usr/share/dict/words" +
-            "\n" + "5.) Test iterating over password file using all available rules");
-            userResponse = scan.next();
-            if (userResponse.equals("1") || userResponse.equals("2") || userResponse.equals("3") || userResponse.equals("4") || userResponse.equals("5")) {
-                //Here is where the rule has been selected and we need to actually start generating guesses based on it.
-            	try (BufferedReader br = new BufferedReader(new FileReader(inputFile))) {
-            	    String line;
-            	    while ((line = br.readLine()) != null) {
-            	    	//just separating out the hash of each line in the input testFile test will be ran against this hash
-            	    	String[] splited = line.split("[\\:\\s]+");
-            	    	String currentHash = splited[1];
-            	    	//System.out.println(currentHash);
-            	    	generateGuesses(Integer.parseInt(userResponse), currentHash);
-            	    }
-            	}
-            }
+        	
+	        //Clear output file from any previous run
+	        Writer writer = new FileWriter(outputFile);
+	        writer.close();
+	        
+	        
+	        //Grab the filepath needed to iterate rules over
+	        String inputFilePath="";
+	        
+	        if(args.length == 0){
+	            System.out.println("error no filepath specified as argument");
+	            System.exit(0);
+	        }
+	        else {
+	        	inputFilePath = args[0];
+	        }
+	        
+	        //Code to handle filepath errors
+	        File inputFile = new File(inputFilePath);
+	        if(!inputFile.exists()){
+	        	System.out.println("error no file exist at provided filepath: " + inputFilePath);
+	        	System.exit(0);
+	        }
+	        if(inputFile.isDirectory()) {
+	        	System.out.println("error filepath points to a directory");
+	        	System.exit(0);
+	        }
+	        
+	        
+	        //Here the input file is guaranteed to exist and be a non-directory
+	        inputFile = new File(inputFilePath);
+	        String userResponse="";
+	        Scanner scan = new Scanner(System.in);
+	        
+	        //Here we keep asking the user what rules they wish to test until they decide to quit
+	        while(userResponse.compareToIgnoreCase("q")!=0){
+	            //User needs to choose a rule to test
+	            System.out.println("Please select a rule to test:   Or 'q' to quit" +
+	            "\n" + "1.) All numbers (4 digits to 6 digits in length)" +
+	            "\n" + "2.) A four char word which gets the first letter capitalized and a 1-digit number appended." +
+	            "\n" + "3.) A five char word with the letter 'e' in it which gets replaced with a 3" +
+	            "\n" + "4.) Any single word from /usr/share/dict/words" +
+	            "\n" + "5.) Test iterating over password file using all available rules");
+	            
+	            userResponse = scan.next();
+	            if (userResponse.equals("1") || userResponse.equals("2") || userResponse.equals("3") || userResponse.equals("4") || userResponse.equals("5")) {
+	            	
+	                //Here is where the rule has been selected and we need to actually start generating guesses based on it.
+	            	try (BufferedReader br = new BufferedReader(new FileReader(inputFile))) {
+	            	    String line;
+	            	    while ((line = br.readLine()) != null) {
+	            	    	//just separating out the hash of each line in the input testFile test will be ran against this hash
+	            	    	String[] splited = line.split("[\\:\\s]+");
+	            	    	String currentHash = splited[1];
+	            	    	//System.out.println(currentHash);
+	            	    	generateGuesses(Integer.parseInt(userResponse), currentHash);
+	            	    }
+	            	}
+	            }
         }
         scan.close();
         System.out.println("Exiting...");
-        }
-
-        private static String askForFilepath(){
-        String inputFilePath;
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Please provide a path to file containing hashed passwords.  Or 'q' to quit");
-        inputFilePath = scan.next();
-        if (inputFilePath.equals("q") || inputFilePath.equals("Q")){
-            System.out.println("Exiting...");
-            System.exit(0);
-        }
-        scan.close();
-        return inputFilePath;
         }
 
         private static void generateGuesses(int ruleToTest, String currentHash) throws FileNotFoundException, IOException{
@@ -122,10 +120,8 @@ public class PasswordCracker{
 		                    }
 	                    }
                 	}
-                    
-                    
                     break;
-                case 2:
+                case 2: //any 4 digit long word in dict with the first letter capitalized and a number appended
                 	wordsFile = new File("/usr/share/dict/words");
                 	try (BufferedReader br = new BufferedReader(new FileReader(wordsFile))) {
                 	    String line;
@@ -142,7 +138,7 @@ public class PasswordCracker{
                 	    }
                 	}
                 	break;
-                case 3:
+                case 3: //any 5 character long word in dict containing e and one replacement of e => 3
                 	wordsFile = new File("/usr/share/dict/words");
                 	try (BufferedReader br = new BufferedReader(new FileReader(wordsFile))) {
                 	    String line;
@@ -200,6 +196,7 @@ public class PasswordCracker{
         	    return null;
         	}
         
+        //helper method to write output password and hash to an output file
         private static void writeToFile(String pass, String hash, File f) throws IOException {
         	Writer writerAfterClear = new FileWriter(f, true);
         	writerAfterClear.write(hash + ":" + pass + "\n");
