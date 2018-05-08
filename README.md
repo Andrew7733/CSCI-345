@@ -1,6 +1,5 @@
-# CSCI-345
-Password Cracker HW1
-
+# CSCI345
+This is a simple brute force password cracker written in Java for use in HW for CSCI345
 by Brandi Durham and Andrew Miller
 
 
